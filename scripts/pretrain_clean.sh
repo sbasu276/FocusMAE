@@ -16,8 +16,8 @@ export OMP_NUM_THREADS=1
 
 
 OUTPUT_DIR='pretrained_model_working_directory'
-DATA_PATH='pretrained_data_train.txt'
-MODEL_PATH='Pretrained_model_path'
+DATA_PATH='txt file for Pretraining data'
+MODEL_PATH='Pretrained model path'
 
 # JOB_NAME=$1
 PARTITION=${PARTITION:-"video"}

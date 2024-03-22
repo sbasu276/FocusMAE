@@ -10,7 +10,7 @@ export MASTER_PORT=${MASTER_PORT:-12320}
 export OMP_NUM_THREADS=1
 export CUDA_VISIBLE_DEVICES=2,3
 
-OUTPUT_DIR='working_directory_fold_3_path'
+OUTPUT_DIR='working directory test_model_fold_3_path'
 DATA_PATH='Data_path_fold_4'
 MODEL_PATH='Pretrained_model_path'
 COLUMN_NAME='pred_column'
@@ -57,7 +57,7 @@ torchrun --rdzv_backend=c10d --rdzv_endpoint=localhost:0 --nnodes=1  --nproc_per
         ${PY_ARGS}
         
 
-OUTPUT_DIR='working_directory_fold_4_path'
+OUTPUT_DIR='working directory test_model_fold_4_path'
 DATA_PATH='Data_path_fold_4'
 
 torchrun --rdzv_backend=c10d --rdzv_endpoint=localhost:0 --nnodes=1  --nproc_per_node=${GPUS_PER_NODE}\
@@ -94,7 +94,7 @@ torchrun --rdzv_backend=c10d --rdzv_endpoint=localhost:0 --nnodes=1  --nproc_per
         --pred_column ${COLUMN_NAME} \
         ${PY_ARGS}
 
-OUTPUT_DIR='working_directory_fold_2_path'
+OUTPUT_DIR='working directory test_model_fold_2_path'
 DATA_PATH='Data_path_fold_2'
 
 
@@ -134,7 +134,7 @@ torchrun --rdzv_backend=c10d --rdzv_endpoint=localhost:0 --nnodes=1  --nproc_per
         ${PY_ARGS}
 
 
-OUTPUT_DIR='working_directory_fold_1_path'
+OUTPUT_DIR='working directory test_model_fold_1_path'
 DATA_PATH='Data_path_fold_1'
 #90 epochs
 
@@ -172,7 +172,7 @@ torchrun --rdzv_backend=c10d --rdzv_endpoint=localhost:0 --nnodes=1  --nproc_per
         --pred_column ${COLUMN_NAME} \
         ${PY_ARGS}
 
-OUTPUT_DIR='working_directory_fold_0_path'
+OUTPUT_DIR='working directory test_model_fold_0_path'
 DATA_PATH='Data_path_fold_0'
 
 #90 epcohs
