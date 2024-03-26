@@ -36,12 +36,12 @@ pip install -r requirements.txt
 The folder scripts contains files for [Finetuning](scripts/finetune_train.sh) and [Pre-training](scripts/pretrain_train.sh).
 
 In each script specify the following:
-### OUTPUT_DIR : 
+# OUTPUT_DIR : 
 - Working directory name which saves all the checkpoints
 - Each working directory folder structure looks like this:- Dataset_folder/work_dir/output_dir_name/checkpoint_folder
 - Download the model checkpoints and pretrained folders in the same format
 
-### MODEL_PATH : 
+# MODEL_PATH : 
 - Specify the path of the pretrained model to finetune from 
 - You can download the pretrained models and arrange then in the folder structure shown above.
 
