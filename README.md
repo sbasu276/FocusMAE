@@ -47,5 +47,5 @@ In each script specify the following:
 
 
 
-We provide our training and testing scripts as examples which can be used as follows 
+Additionally, we provide our training and testing scripts as examples which can be used as follows 
 ```bash scripts/finetune_train.sh``` 
