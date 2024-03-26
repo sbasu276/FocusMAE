@@ -3,8 +3,6 @@
 This is the official implementation for the CVPR 2024 paper [FocusMAE: Gallbladder Cancer Detection from Ultrasound Videos with Focused Masked Autoencoders](https://arxiv.org/abs/2403.08848).
 
 
-[CVPR Weigths](https://drive.google.com/drive/folders/16E1EDl323GFAbmQ02fqVQwVkkz-4GBZY?usp=sharing)
-
 ## DATA PREPARATION
 
 Refer to the [instructions](https://github.com/OpenGVLab/VideoMAEv2/blob/master/docs/DATASET.md) in VideoMAE v2 Repository for this step.
@@ -44,6 +42,17 @@ In each script specify the following:
 #### MODEL_PATH : 
 - Specify the path of the pretrained model to finetune from 
 - You can download the pretrained models and arrange then in the folder structure shown above.
+
+Our pretrained models and checkpoints can be downloaded from this link : [CVPR Weigths](https://drive.google.com/drive/folders/16E1EDl323GFAbmQ02fqVQwVkkz-4GBZY?usp=sharing)
+
+| Model Name                       | Link                         |
+|----------------------------------|------------------------------|
+| Pre-trained model for inference  | https://tinyurl.com/3s6567c3 | 
+| Finetuning ckpt - Fold_0 GBC dataset | https://tinyurl.com/4y2phujr |
+| Finetuning ckpt - Fold_1 GBC dataset | https://tinyurl.com/ajazhb79 |
+| Finetuning ckpt - Fold_2 GBC dataset | https://tinyurl.com/3jptv2dp |
+| Finetuning ckpt - Fold_3 GBC dataset | https://tinyurl.com/2r9ywuzj |
+| Finetuning ckpt - Fold_4 GBC dataset | https://tinyurl.com/25zuures |
 
 
 
