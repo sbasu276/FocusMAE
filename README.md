@@ -29,7 +29,7 @@ pip install -r requirements.txt
 - It is recommended to install **`timm == 0.4.12`**, because some of the APIs we use are deprecated in the latest version of timm.
 
 
-## Training and Testing Scripts
+## USAGE INSTRUCTIONS
 
 The folder scripts contains files for [Finetuning](scripts/finetune_train.sh) and [Pre-training](scripts/pretrain_train.sh).
 
