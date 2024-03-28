@@ -9,6 +9,10 @@ Refer to the [instructions](https://github.com/OpenGVLab/VideoMAEv2/blob/master/
 
 Additionally, we suggest using the --test_randomization argument while testing for best results.
 
+For the region priors using FasterRCNN model, obtain the region proposals in a JSON file for each video using this [code](https://drive.google.com/file/d/1E_LoLKjZ1Co-HrAcPbDasHpDXrJ3Caw2/view).
+
+Specify the path for folder containing the json files in the dataloader. 
+
 
 ## INSTALLATION 
 
