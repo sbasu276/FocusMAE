@@ -14,6 +14,12 @@ For the region priors using FasterRCNN model, obtain the region proposals in a J
 Specify the path for folder containing the json files in the dataloader. 
 
 
+## DATASET
+
+We contribute additional videos to our Ultrasound video dataset (GBUSV). The complete dataset comprises of 59 videos with malignancy and 32 videos which are benign. The dataset donload instructions are available (here)[https://gbc-iitd.github.io/data/gbusv]
+
+CT 
+
 ## INSTALLATION 
 
 The required packages are in the file `requirements.txt`, and you can run the following command to install the environment
@@ -40,8 +46,10 @@ The folder scripts contains files for [Finetuning](scripts/finetune_train.sh) an
 In each script specify the following:
 #### OUTPUT_DIR : 
 - Working directory name which saves all the checkpoints
-- Each working directory folder structure looks like this:- Dataset_folder/work_dir/output_dir_name/checkpoint_folder
-- Download the model checkpoints and pretrained folders in the same format
+- Each working directory folder structure looks like this:- 
+```Dataset_folder/work_dir/output_dir_name/checkpoint_folder```
+- You can either download the model checkpoints and pretrained folders in the same format, or download individual checkpoint from the links in the table and place them in the folder structure desscribed above.
+
 
 #### MODEL_PATH : 
 - Specify the path of the pretrained model to finetune from 
