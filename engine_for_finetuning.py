@@ -837,8 +837,7 @@ def merge_vid_class(eval_path, num_tasks,args, method='prob', pred_column="vit_p
                 dict_feats[name] = []
                 dict_label[name] = 0
                 dict_pos[name] = []
-            # if chunk_nb + split_nb in dict_pos[name]:
-            #     continue
+            
             if method == 'prob':
                 dict_feats[name].append(softmax(data))
                 if name in vid_res.keys():
@@ -847,27 +846,19 @@ def merge_vid_class(eval_path, num_tasks,args, method='prob', pred_column="vit_p
                     vid_res[name] = [(np.argmax(softmax(data)), int(label), indices)]
             else:
                 dict_feats[name].append(data)
-            # dict_pos[name].append(chunk_nb + split_nb)
             dict_label[name] = label
     print("Computing final results")
 
     
     acc = 0
-    # if os.path.exist(f"")
-    # df1 = {"videoname": [], "clipNum": [], "label":[], "pred":[], "indices":[]}
     
     clip_labels = ""
     label = []
     preds = []
     for keys in vid_res.keys():
         
-        # df1["videoname"] += [keys] * len(vid_res[keys])
         max_label = max([x[1] for x in vid_res[keys]])
-        # df1['label'] += [x[1] for x in vid_res[keys]]
-        # df1['pred'] += [x[0] for x in vid_res[keys]]
-        # df1['indices'] += [x[2] for x in vid_res[keys]]
-        # df1["clipNum"] += [i for i in range(len(vid_res[keys]))]
-    
+
         if args.test_randomization or  args.sampling_scheme=="scheme1":
             max_pred = max([x[0] for x in vid_res[keys]])
             
@@ -882,15 +873,7 @@ def merge_vid_class(eval_path, num_tasks,args, method='prob', pred_column="vit_p
 
     cm1 = confusion_matrix(label,preds)
     print('Confusion Matrix : \n', cm1)
-    
-    # df1 = pd.DataFrame(df1)
-    # if os.path.exists(f"{args.data_set}_results.csv"):
-    #     df0 = pd.read_csv(f"{args.data_set}_results.csv")
-    #     df1 = pd.concat([df0,df1])
-    #     df1.to_csv(f"{args.data_set}_results.csv", index=None)
-    
-    # else:
-    #     df1.to_csv(f"{args.data_set}_results.csv", index=None)
+
     
     total1=sum(sum(cm1))
     #####from confusion matrix calculate accuracy
@@ -900,11 +883,7 @@ def merge_vid_class(eval_path, num_tasks,args, method='prob', pred_column="vit_p
         run['video_accuracy'].append(accuracy1)
 
     sensitivity = cm1[1,1]/(cm1[1,0]+cm1[1,1])
-    # if args.data_set=="CT_Data": #invert sens and specs in case of covid dataset 
-    #     print('Specificity: ', specificity1)
-    #     if run:
-    #         run['video_specificity1'].append(specificity1)
-    # else:
+
     print('Sensitivity: ', sensitivity)
     if run:
         run['video_sensitivity'].append(sensitivity)
@@ -931,6 +910,65 @@ def merge_vid_class(eval_path, num_tasks,args, method='prob', pred_column="vit_p
 
     return final_top1 * 100, final_top5 * 100
 
+
+def merge_ct(eval_path, num_tasks, run=None):
+    dict_feats = {}
+    dict_label = {}
+    dict_pos = {}
+    print("Reading individual output files")
+
+    for x in range(num_tasks):
+        file = os.path.join(eval_path, str(x) + '.txt')
+        lines = open(file, 'r').readlines()[1:]
+        for line in lines:
+            line = line.strip()
+            name = line.split('[')[0]
+            label = line.split(']')[1].split(' ')[1]
+            chunk_nb = line.split(']')[1].split(' ')[2]
+            split_nb = line.split(']')[1].split(' ')[3]
+            data = np.fromstring(line.split('[')[1].split(']')[0], dtype=np.float16, sep=',')
+            data = softmax(data)
+            if not name in dict_feats:
+                dict_feats[name] = []
+                dict_label[name] = 0
+                dict_pos[name] = []
+            if chunk_nb + split_nb in dict_pos[name]:
+                continue
+            dict_feats[name].append(data)
+            dict_pos[name].append(chunk_nb + split_nb)
+            dict_label[name] = label
+    print("Computing final results")
+
+    input_lst = []
+    print(len(dict_feats))
+    for i, item in enumerate(dict_feats):
+        input_lst.append([i, item, dict_feats[item], dict_label[item]])
+    from multiprocessing import Pool
+    p = Pool(64)
+    ans = p.map(compute_video, input_lst)
+    top1 = [x[1] for x in ans]
+    top5 = [x[2] for x in ans]
+    pred = [x[0] for x in ans]
+    label = [x[3] for x in ans]
+
+
+    cm = confusion_matrix(label, pred)
+    print("confusion matrix: ", cm)
+    specificity1 = cm[1,1]/(cm[1,0]+cm[1,1])
+    sensitivity1 = cm[0,0]/(cm[0,0]+cm[0,1])
+
+    print('Specificity  : ', specificity1)
+    
+    print('Sensitivity : ', sensitivity1 )
+    
+
+    accuracy1 = (cm[1,1]+cm[0,0])/sum(sum(cm))
+    
+    print('Accuracy  : ', accuracy1)
+
+    print(pred, label)
+    final_top1 ,final_top5 = np.mean(top1), np.mean(top5)
+    return final_top1*100 ,final_top5*100
 
 
 def compute_video(lst):

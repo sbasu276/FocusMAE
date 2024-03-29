@@ -34,7 +34,7 @@ from engine_for_finetuning import (
     merge,
     train_one_epoch,
     validation_one_epoch,
-     merge_vid_class
+     merge_vid_class, merge_ct
 )
 from optim_factory import (
     LayerDecayValueAssigner,
@@ -395,6 +395,10 @@ def get_args():
 
     parser.add_argument(
         '--enable_deepspeed', action='store_true', default=False)
+    
+    parser.add_argument(
+        '--eval_ct' , action='store_true' , default=False
+    )
     
     parser.add_argument(
     '--test_randomization', action='store_true', default=False)
@@ -951,8 +955,12 @@ def main(args, ds_init):
 
     if global_rank == 0:
         print("Start merging results...")
+        
         final_top1, final_top5 = merge(args.output_dir, num_tasks)
-        _, _ = merge_vid_class(args.output_dir, num_tasks,args, method='prob', pred_column = args.pred_column)
+        if args.data_set=="GBC_Net":
+            _, _ = merge_vid_class(args.output_dir, num_tasks,args, method='prob', pred_column = args.pred_column)
+        elif args.eval_ct:
+            _,_  = merge_ct(args.output_dir, num_tasks,args, )
         print(
             f"Accuracy of the network on the {len(dataset_test)} test videos: Top-1: {final_top1:.2f}%, Top-5: {final_top5:.2f}%"
         )
