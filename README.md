@@ -65,8 +65,8 @@ Our pretrained models and checkpoints can be downloaded from this link : [CVPR W
 | Finetuning ckpt - Fold_2 GBC dataset | https://tinyurl.com/3jptv2dp |
 | Finetuning ckpt - Fold_3 GBC dataset | https://tinyurl.com/2r9ywuzj |
 | Finetuning ckpt - Fold_4 GBC dataset | https://tinyurl.com/25zuures |
-| Pretrained model for CT Dataset | (here)[https://drive.google.com/file/d/1G2BzBzOARGyeam2B-zVuUN0KphhkMeAe/view?usp=sharing] |
-| Finetuning ckpt - CT Dataset | (here)[https://drive.google.com/file/d/14eP3hx9M3E5HM0GZvp2QbUgu86DMPNU3/view?usp=sharing] |
+| Pretrained model for CT Dataset | [here](https://drive.google.com/file/d/1G2BzBzOARGyeam2B-zVuUN0KphhkMeAe/view?usp=sharing) |
+| Finetuning ckpt - CT Dataset | [here](https://drive.google.com/file/d/14eP3hx9M3E5HM0GZvp2QbUgu86DMPNU3/view?usp=sharing) |
 
 
 Additionally, we provide our training and testing scripts as examples which can be used as follows 
