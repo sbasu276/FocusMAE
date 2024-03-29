@@ -56,9 +56,7 @@ class DataAugmentationForCandidateRegionVideomae(object):
         self.args = args
         if args.mask_type in  ['ours', 'ours2']:
             self.encoder_mask_map_generator = None
-            # self.encoder_mask_map_generator = OursMaskingGeneratorv1(
-            #     images , roi_boxes
-            # )
+            
             pass
             
         elif args.mask_type == 'tube':
@@ -76,7 +74,6 @@ class DataAugmentationForCandidateRegionVideomae(object):
                     'Unsupported decoder masking strategy type.')
 
     def __call__(self, images, roi_boxes ):
-        # print("in maksing function ", images)
         if self.args.mask_type== 'ours':
             self.encoder_mask_map_generator = OursMaskingGeneratorv1((self.args.num_frames, self.args.input_size, self.args.input_size), roi_boxes, mask_ratio=self.args.mask_ratio, inflation_ratio=self.args.inflateroi)
         elif self.args.mask_type== 'ours2':
@@ -86,7 +83,7 @@ class DataAugmentationForCandidateRegionVideomae(object):
 
             
         process_data, _ = self.transform(images)
-        # print("process data function ", process_data.shape)
+       
         encoder_mask_map = self.encoder_mask_map_generator()
         if hasattr(self, 'decoder_mask_map_generator'):
             decoder_mask_map = self.decoder_mask_map_generator()
@@ -151,9 +148,7 @@ class DataAugmentationForVideoMAEv2(object):
                     'Unsupported decoder masking strategy type.')
 
     def __call__(self, images):
-        # print("in maksing function ", images)
         process_data, _ = self.transform(images)
-        # print("process data function ", process_data.shape)
         encoder_mask_map = self.encoder_mask_map_generator()
         if hasattr(self, 'decoder_mask_map_generator'):
             decoder_mask_map = self.decoder_mask_map_generator()
@@ -212,9 +207,8 @@ class DataAugmentationForFineTune(object):
                     'Unsupported decoder masking strategy type.')
 
     def __call__(self, images):
-        # print("in maksing function ", len(images))
+        
         process_data, _ = self.transform(images)
-        # print("process data function ", process_data.shape)
         encoder_mask_map = self.encoder_mask_map_generator()
         if hasattr(self, 'decoder_mask_map_generator'):
             decoder_mask_map = self.decoder_mask_map_generator()
@@ -852,19 +846,6 @@ class VideoMAE_Inference(torch.utils.data.Dataset):
                                                     segment_indices,
                                                     skip_offsets)
             
-                # images = []
-                # for idx in frame_id_list:
-                #     frame_fname = os.path.join(
-                #         video_name, self.name_pattern.format(idx + start_idx))
-                #     img = self.image_loader(frame_fname)
-                #     img = Image.fromarray(img)
-                #     images.append(img)
-
-        # except Exception as e:
-        #     print("Failed to load video from {} with error {}".format(
-        #         video_name, e))
-        #     index = random.randint(0, len(self.clips) - 1)
-        #     return self.__getitem__(index)
 
         if self.num_sample > 1:
             process_data_list = []
@@ -883,36 +864,22 @@ class VideoMAE_Inference(torch.utils.data.Dataset):
                     try:
                         img = self.image_loader(frame_fname)
                     except(FileNotFoundError):
-                        # frame_fname = os.path.join(
-                        # video_name, self.name_pattern.format(max(0,idx + start_idx-3)))
                         file = sorted([x for x in os.listdir(video_name) if "home" not in x])[-1]
                         frame_fname = os.path.join(video_name, file)
-                        # print(file)
                         img = self.image_loader(frame_fname)
-                    # print("could not read ",frame_fname)
                     img = Image.fromarray(img)
                     images.append(img)
                     
-                    # except:
-                    #     continue
-
-                # print("iamges shape ", len(images))
-
+                  
                 process_data, encoder_mask, decoder_mask = self.transform(
                     (images, None))
-                # print(process_data.numel()/(224*224*3))
                 clip_len = int(min(self.clip_len, process_data.numel()/(224*224*3)))
-                # print("clip len ", clip_len)
                 
                 if clip_len == 16:
 
                     process_data = process_data.view(
                     (self.clip_len , 3) + process_data.size()[-2:]).transpose(
                         0, 1)
-                    # empty_frame = torch.zeros(process_data[0, ...].shape)
-                    # print("adding empty frames to match size")
-                    # for i in range(self.clip_len - clip_len):
-                    #     process_data = torch.cat((process_data, empty_frame), dim=0)
                     process_data_list.append(process_data)
                     encoder_mask_list.append(encoder_mask)
                     decoder_mask_list.append(decoder_mask)
@@ -927,7 +894,6 @@ class VideoMAE_Inference(torch.utils.data.Dataset):
             frame_id_list = frame_id_lists[0]
             images = []
             frame_fname = "/".join(os.path.join(video_name, self.name_pattern.format(frame_id_list[0] + start_idx)).split("/")[-2:])
-            # frame_ids.append(frame_fname)
             
                 
             for idx in frame_id_list:
@@ -942,7 +908,6 @@ class VideoMAE_Inference(torch.utils.data.Dataset):
             process_data = process_data.view(
                 (self.clip_len, 3) + process_data.size()[-2:]).transpose(
                     0, 1)
-            # print("<1 smaple", frame_fname)
             return process_data, encoder_mask, decoder_mask, video_name, frame_fname
         
         
@@ -960,7 +925,6 @@ class VideoMAE_Inference(torch.utils.data.Dataset):
             data = split_f.readlines()
             for line in data:
                 line_info = line.split(' ')
-                # line format: video_path, start_idx, total_frames
                 if len(line_info) < 3:
                     raise (RuntimeError(
                         'Video input format is not correct, missing one or more element. %s'
@@ -997,17 +961,7 @@ class VideoMAE_Inference(torch.utils.data.Dataset):
     
     def _sample_train_indices2(self, num_frames):
     
-        # if average_duration > 0:
-            # offsets = np.multiply(
-            #     list(range(self.num_segments)), average_duration)
-            # offsets = offsets + np.random.randint(
-            #     average_duration, size=self.num_segments)
-
-        # if num_frames > max(self.num_segments, self.skip_length):
-        #     offsets = np.sort(
-        #         np.random.randint(
-        #             num_frames - self.skip_length + 1, size=self.num_segments))
-        # else:
+       
         offsets = np.multiply(list(range(self.num_segments)), self.new_length)
 
         if self.temporal_jitter:
@@ -1032,10 +986,8 @@ class VideoMAE_Inference(torch.utils.data.Dataset):
                 if offset + self.new_length < duration:
                     offset += self.new_step
             frame_id_lists.append(frame_id_list)
-        # print(frame_id_lists)
+       
         return frame_id_lists
-
-
 
 
 
@@ -1108,6 +1060,7 @@ class Candidate_ROI_Videomae(torch.utils.data.Dataset):
                  transform=None,
                  temporal_jitter=False,
                  lazy_init=False,
+                 candidate_region_path = "../Faster-RCNN/out"
                 ):
 
         super(Candidate_ROI_Videomae, self).__init__()
@@ -1128,8 +1081,7 @@ class Candidate_ROI_Videomae(torch.utils.data.Dataset):
         self.video_ext = video_ext
         self.transform = transform
         self.lazy_init = lazy_init
-        
-        self.candidate_json_path = "/home/mayuna/scratch/Faster-RCNN/out"
+        self.candidate_json_path = candidate_region_path
 
         self.video_loader = get_video_loader()
         self.image_loader = get_image_loader()
@@ -1152,10 +1104,9 @@ class Candidate_ROI_Videomae(torch.utils.data.Dataset):
         try:
             with open(jsonfile, 'r') as f:
                 data = json.load(f)
-            # bboxes = []
             framebboxes = data['results']
             for frames in framebboxes:
-                # print(frames, frame)
+                
                 if frames['image_id'] == frame:
                     return frames['Boxes']
         except:
@@ -1164,12 +1115,11 @@ class Candidate_ROI_Videomae(torch.utils.data.Dataset):
 
 
     def __getitem__(self, index):
-        # try:
+        
         video_name, start_idx, total_frame = self.clips[index]
         if self.test_mode:
             self.num_segments = (total_frame - self.clip_len)//self.new_length
             self.num_sample = self.num_segments
-        # print(video_name, total_frame, self.num_sample, self.num_segments)
         
         if total_frame < 0:  # load video
             decord_vr = self.video_loader(video_name)
@@ -1200,20 +1150,6 @@ class Candidate_ROI_Videomae(torch.utils.data.Dataset):
                                                     segment_indices,
                                                     skip_offsets)
             
-                # images = []
-                # for idx in frame_id_list:
-                #     frame_fname = os.path.join(
-                #         video_name, self.name_pattern.format(idx + start_idx))
-                #     img = self.image_loader(frame_fname)
-                #     img = Image.fromarray(img)
-                #     images.append(img)
-
-        # except Exception as e:
-        #     print("Failed to load video from {} with error {}".format(
-        #         video_name, e))
-        #     index = random.randint(0, len(self.clips) - 1)
-        #     return self.__getitem__(index)
-
         if self.num_sample > 1:
             process_data_list = []
             encoder_mask_list = []
@@ -1231,45 +1167,30 @@ class Candidate_ROI_Videomae(torch.utils.data.Dataset):
                     try:
                         img = self.image_loader(frame_fname)
                     except(FileNotFoundError):
-                        # frame_fname = os.path.join(
-                        # video_name, self.name_pattern.format(max(0,idx + start_idx-3)))
                         file = sorted([x for x in os.listdir(video_name) if "home" not in x])[-1]
                         frame_fname = os.path.join(video_name, file)
-                        # print(file)
                         img = self.image_loader(frame_fname)
-                    # print("could not read ",frame_fname)
                     img = Image.fromarray(img)
                     images.append(img)
                     roi_region = self.get_candidate_region(frame_fname)
                     rois.append(roi_region)
                     
-                    # except:
-                    #     continue
-
-                # print("iamges shape ", len(images))
-                
+                    
                 process_data, encoder_mask, decoder_mask = self.transform(
                     (images, None), rois)
-                # print(process_data.numel()/(224*224*3))
                 clip_len = int(min(self.clip_len, process_data.numel()/(224*224*3)))
-                # print("clip len ", clip_len)
                 
                 if clip_len == 16:
 
                     process_data = process_data.view(
                     (self.clip_len , 3) + process_data.size()[-2:]).transpose(
                         0, 1)
-                    # empty_frame = torch.zeros(process_data[0, ...].shape)
-                    # print("adding empty frames to match size")
-                    # for i in range(self.clip_len - clip_len):
-                    #     process_data = torch.cat((process_data, empty_frame), dim=0)
                     process_data_list.append(process_data)
                     encoder_mask_list.append(encoder_mask)
                     decoder_mask_list.append(decoder_mask)
                 else:
                     pass
-            # print(">1 sample ", frame_ids)
-
+            
             return process_data_list, encoder_mask_list, decoder_mask_list , video_name, frame_ids
         
         elif len(frame_id_lists)>0:
@@ -1277,7 +1198,6 @@ class Candidate_ROI_Videomae(torch.utils.data.Dataset):
             frame_id_list = frame_id_lists[0]
             images = []
             frame_fname = "/".join(os.path.join(video_name, self.name_pattern.format(frame_id_list[0] + start_idx)).split("/")[-2:])
-            # frame_ids.append(frame_fname)
             rois = []
                 
             for idx in frame_id_list:
@@ -1294,7 +1214,6 @@ class Candidate_ROI_Videomae(torch.utils.data.Dataset):
             process_data = process_data.view(
                 (self.clip_len, 3) + process_data.size()[-2:]).transpose(
                     0, 1)
-            # print("<1 smaple", frame_fname)
             return process_data, encoder_mask, decoder_mask, video_name, frame_fname
         
         
@@ -1349,17 +1268,6 @@ class Candidate_ROI_Videomae(torch.utils.data.Dataset):
     
     def _sample_train_indices2(self, num_frames):
     
-        # if average_duration > 0:
-            # offsets = np.multiply(
-            #     list(range(self.num_segments)), average_duration)
-            # offsets = offsets + np.random.randint(
-            #     average_duration, size=self.num_segments)
-
-        # if num_frames > max(self.num_segments, self.skip_length):
-        #     offsets = np.sort(
-        #         np.random.randint(
-        #             num_frames - self.skip_length + 1, size=self.num_segments))
-        # else:
         offsets = np.multiply(list(range(self.num_segments)), self.new_length)
 
         if self.temporal_jitter:
@@ -1384,7 +1292,6 @@ class Candidate_ROI_Videomae(torch.utils.data.Dataset):
                 if offset + self.new_length < duration:
                     offset += self.new_step
             frame_id_lists.append(frame_id_list)
-        # print(frame_id_lists)
         return frame_id_lists
 
 

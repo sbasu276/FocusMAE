@@ -93,47 +93,25 @@ class OursMaskingGeneratorv1:
                 for r in roi_box:
                     r = self.roi_region_inflater(r, ratio=inflation_ratio)
                     rb.append(r)
-                    # x1, y1, sx2, self.y2 = roi_box
-                # self.roi_box_list.append(roi_box)
-            else:
+                   
+            else:#incase of no bounding box at all for usg we can focus on the centre region of the image due to balg regions in ultrasound images
                 rb.append([self.height//4, self.width//4, self.height*3//4, self.width*3//4])
 
             self.roi_box_list.append(rb)
-                # self.roi_box_list.append([[0,0,self.height, self.width]])
-        # print("list of roi boexes ",self.roi_box_list)
         self.num_patch_per_frames = (self.height//patch_size[0]) * (self.width//patch_size[1]) 
         self.total_patches = (self.frames//patch_size[2]) * self.num_patch_per_frames
-        # self.window_2_frames = np.ones(self.num_patch_per_2_frames)
-
-        # self.patch_not_in_rois =  [self.is_patch_not_in_roi(patch, ) for patch in range(self.num_patch_per_2_frames)]
+        
         self.patch_not_in_rois = np.zeros(self.num_patch_per_frames)  #we are making a mask only for the first frame and then repeat it 
-        # print("total number patch ",self.patch_not_in_rois.shape)
-
-        # for x in range(self.frames):
             
         for y in range(self.num_patch_per_frames): 
 
             self.patch_not_in_rois[y] = self.is_patch_in_roi(y, self.roi_box_list[representative_frame])
                 
 
-        # print("check patchwork ",self.patch_not_in_rois, "not roi patches ",sum(self.patch_not_in_rois))
-
-        # self.patches_in_roi_region = ((self.x2-self.x1)//patch_size[0]) * ((self.y2-self.y1)//patch_size[1]) 
-
-        
-        # self.num_patches_per_frame = self.height * self.width  # 14x14
-        
         self.num_masks = sum(self.patch_not_in_rois)
-        # if self.num_masks == 0:
-        #     self.num_masks = int((1 -mask_ratio) * (self.total_patches)) 
-
-        # print("Num Masks ",self.num_masks)
-        # self.total_masks = self.frames * self.num_masks_per_frame
 
     def roi_region_inflater(self, boxes, ratio = 1.1):
-        # print(boxes)
         x1 ,y1, x2, y2 = boxes
-        # print(x1,y1,x2,y2)
         x4 = x1 + (x2-x1)*(1+ (ratio-1)*0.5)
         y4 = y1 + (y2-y1)*(1+ (ratio-1)*0.5)
         x3 = x1 - (x2 - x1)*(ratio-1)*0.5
@@ -142,8 +120,6 @@ class OursMaskingGeneratorv1:
         return x3,y3,x4,y4
     
     def is_patch_in_roi(self, patch_number, roi_boxes):
-        #if centree of patch in roi region we count it as in (rasterization) 
-        # print(patch_number, )
         x1 ,y1 = max((patch_number//(self.input_size//self.patch_size))*self.patch_size - self.patch_size//2 , 0) , max( (patch_number%(self.input_size//self.patch_size)) *self.patch_size - self.patch_size//2 , 0)
         for roi_box in roi_boxes:
             x1r,y1r,x2r,y2r = roi_box
@@ -158,7 +134,6 @@ class OursMaskingGeneratorv1:
             elif y1 < min(y1r, y2r) or  y1 > max(y1r, y2r):
                 continue
             else:
-                # print("inpatch ", x1, y1)
                 return 1
         return 0
 
@@ -169,24 +144,10 @@ class OursMaskingGeneratorv1:
 
     def __call__(self):
        
-        # if self.total_patches > sum(self.patch_not_in_rois):
-        #     indices = [ind for ind, ele in enumerate(self.patch_not_in_rois) if ele == 1]
-        # else:
-        #     indices = [ind for ind in range(len(self.patch_not_in_rois))]
-
+       
         mask_per_frame = self.patch_not_in_rois
 
-        # if not self.num_masks==0:
-        #     mask_one_roi = random.choices(indices, k=self.num_masks)
-
-            
-        #     for x in mask_one_roi:
-        #         # if self.patch_not_in_rois[x]==0:
-        #         mask_[x] = 1.0
-
-        # mask = np.tile(mask_ , (self.frames//self.tube ,self.num_patch_per_frames))
         mask = np.tile(mask_per_frame, (self.frames//self.tube, 1))
-        # print(mask.shape)
 
         return  mask# [196*8]
 
@@ -206,19 +167,12 @@ class OursMaskingGeneratorv3:
                 for r in roi_box:
                     r = self.roi_region_inflater(r)
                     rb.append(r)
-                    # x1, y1, sx2, self.y2 = roi_box
-                # self.roi_box_list.append(roi_box)
             else:
                 rb.append([self.height//4, self.width//4, self.height*3//4, self.width*3//4])
 
             self.roi_box_list.append(rb)
-                # self.roi_box_list.append([[0,0,self.height, self.width]])
-        # print("list of roi boexes ",self.roi_box_list)
         self.num_patch_per_frames = (self.height//patch_size[0]) * (self.width//patch_size[1]) 
         self.total_patches = (self.frames//patch_size[2]) * self.num_patch_per_frames
-        # self.window_2_frames = np.ones(self.num_patch_per_2_frames)
-
-        # self.patch_not_in_rois =  [self.is_patch_not_in_roi(patch, ) for patch in range(self.num_patch_per_2_frames)]
         self.patch_not_in_rois = np.zeros(self.num_patch_per_frames)  #we are making a mask only for the first frame and then repeat it 
 
         set_of_boxes = self.roi_box_list[0] +  self.roi_box_list[len(self.roi_box_list)//2] + self.roi_box_list[-1]
@@ -229,13 +183,8 @@ class OursMaskingGeneratorv3:
 
         self.num_masks = int(mask_ratio * sum(self.patch_not_in_rois))
 
-        # print("Num Masks ",self.num_masks)
-        # self.total_masks = self.frames * self.num_masks_per_frame
-
     def roi_region_inflater(self, boxes, ratio = 1.1):
-        # print(boxes)
         x1 ,y1, x2, y2 = boxes
-        # print(x1,y1,x2,y2)
         x4 = x1 + (x2-x1)*(1+ (ratio-1)*0.5)
         y4 = y1 + (y2-y1)*(1+ (ratio-1)*0.5)
         x3 = x1 - (x2 - x1)*(ratio-1)*0.5
@@ -244,8 +193,6 @@ class OursMaskingGeneratorv3:
         return x3,y3,x4,y4
     
     def is_patch_in_roi(self, patch_number, roi_boxes):
-        #if centree of patch in roi region we count it as in (rasterization) 
-        # print(patch_number, )
         x1 ,y1 = max((patch_number%14)*16 -8 , 0) , max( (patch_number//14) *16 -8 , 0)
         for roi_box in roi_boxes:
             x1r,y1r,x2r,y2r = roi_box
@@ -260,7 +207,6 @@ class OursMaskingGeneratorv3:
             elif y1 < min(y1r, y2r) or  y1 > max(y1r, y2r):
                 continue
             else:
-                # print("inpatch ", x1, y1)
                 return 1
         return 0
 
@@ -271,24 +217,17 @@ class OursMaskingGeneratorv3:
 
     def __call__(self):
        
-        # if self.total_patches > sum(self.patch_not_in_rois):
         indices = [ind for ind, ele in enumerate(self.patch_not_in_rois) if ele == 1]
-        # else:
-        #     indices = [ind for ind in range(len(self.patch_not_in_rois))]
 
         mask_per_frame = self.patch_not_in_rois
         
-        # if not self.num_masks==0:
         mask_one_roi = random.choices(indices, k=self.num_masks)
 
             
         for x in mask_one_roi:
-            # if self.patch_not_in_rois[x]==0:
             mask_per_frame[x] = 1 - mask_per_frame[x]
 
-        # mask = np.tile(mask_ , (self.frames//self.tube ,self.num_patch_per_frames))
         mask = np.tile(mask_per_frame, (self.frames//self.tube, 1))
-        # print(mask.shape)
 
         return  mask# [196*8]
 
@@ -308,19 +247,13 @@ class OursMaskingGeneratorv2:
                 for r in roi_box:
                     r = self.roi_region_inflater(r)
                     rb.append(r)
-                    # x1, y1, sx2, self.y2 = roi_box
-                # self.roi_box_list.append(roi_box)
             else:
                 rb.append([self.height//4, self.width//4, self.height*3//4, self.width*3//4])
 
             self.roi_box_list.append(rb)
-                # self.roi_box_list.append([[0,0,self.height, self.width]])
-        # print("list of roi boexes ",self.roi_box_list)
         self.num_patch_per_frames = (self.height//patch_size[0]) * (self.width//patch_size[1]) 
         self.total_patches = (self.frames//patch_size[2]) * self.num_patch_per_frames
-        # self.window_2_frames = np.ones(self.num_patch_per_2_frames)
 
-        # self.patch_not_in_rois =  [self.is_patch_not_in_roi(patch, ) for patch in range(self.num_patch_per_2_frames)]
         self.patch_not_in_rois = np.zeros(self.num_patch_per_frames)  #we are making a mask only for the first frame and then repeat it 
 
             
@@ -330,13 +263,8 @@ class OursMaskingGeneratorv2:
 
         self.num_masks = int(mask_ratio * sum(self.patch_not_in_rois))
 
-        # print("Num Masks ",self.num_masks)
-        # self.total_masks = self.frames * self.num_masks_per_frame
-
     def roi_region_inflater(self, boxes, ratio = 1.1):
-        # print(boxes)
         x1 ,y1, x2, y2 = boxes
-        # print(x1,y1,x2,y2)
         x4 = x1 + (x2-x1)*(1+ (ratio-1)*0.5)
         y4 = y1 + (y2-y1)*(1+ (ratio-1)*0.5)
         x3 = x1 - (x2 - x1)*(ratio-1)*0.5
@@ -361,7 +289,6 @@ class OursMaskingGeneratorv2:
             elif y1 < min(y1r, y2r) or  y1 > max(y1r, y2r):
                 continue
             else:
-                # print("inpatch ", x1, y1)
                 return 1
         return 0
 
@@ -372,19 +299,14 @@ class OursMaskingGeneratorv2:
 
     def __call__(self):
        
-        # if self.total_patches > sum(self.patch_not_in_rois):
         indices = [ind for ind, ele in enumerate(self.patch_not_in_rois) if ele == 1]
-        # else:
-        #     indices = [ind for ind in range(len(self.patch_not_in_rois))]
-
+       
         mask_per_frame = self.patch_not_in_rois
         
-        # if not self.num_masks==0:
         mask_one_roi = random.choices(indices, k=self.num_masks)
 
             
         for x in mask_one_roi:
-            # if self.patch_not_in_rois[x]==0:
             mask_per_frame[x] = 1 - mask_per_frame[x]
 
         # mask = np.tile(mask_ , (self.frames//self.tube ,self.num_patch_per_frames))

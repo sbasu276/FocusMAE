@@ -22,14 +22,6 @@ def annotation_convolve(string_anno,num_frames , stride=4 , seg_len=16):
     anno = string_anno.strip().split(" ")
     anno = list(map(funcky, anno))
 
-    
-    # convolved_anno = []
-
-    # for i in range((len(anno)-seg_len)//stride):
-
-    #     convolved_anno.append( max(anno[i*stride: i*stride + seg_len])  )
-    
-
     return anno
 
 
@@ -87,7 +79,7 @@ class VideoClsDataset(Dataset):
 
         self.video_loader = get_video_loader()
 
-        cleaned = pd.read_csv(self.anno_path,header=None)#, delimiter=' ')
+        cleaned = pd.read_csv(self.anno_path,header=None, delimiter=' ')
         
         self.dataset_samples = list(
             cleaned[0].apply(lambda row: os.path.join(self.data_root, row)))
@@ -155,8 +147,7 @@ class VideoClsDataset(Dataset):
                 index_list = []
                 for _ in range(args.num_sample):
                     new_frames = self._aug_frame(buffer, args)
-                    # train_seg_len = len(self.label_array[index])//args.num_sample
-                    label = self.label_array[index]#_*train_seg_len:(_+1)*train_seg_len ]
+                    label = self.label_array[index]
                     
                     frame_list.append(new_frames)
                     label_list.append(label)
@@ -164,7 +155,6 @@ class VideoClsDataset(Dataset):
                 return frame_list, label_list, index_list, {}
             else:
                 buffer = self._aug_frame(buffer, args)
-            # labels = list(map(lambda x: max(x), self.label_array))
             return buffer, self.label_array[index], index, {}
 
         elif self.mode == 'validation':
@@ -180,10 +170,7 @@ class VideoClsDataset(Dataset):
                     buffer = self.load_video(sample)
             buffer = self.data_transform(buffer)
 
-            # print("validation labels ", self.label_array[index])
-        
-            # labels = list(map(lambda x: max(x), self.label_array))
-
+          
             return buffer, self.label_array[index], sample.split(
                 "/")[-1].split(".")[0]
 
@@ -423,46 +410,11 @@ class VideoClsDataset_v2(Dataset):
 
         cleaned = pd.read_csv(self.anno_path,header=None)#, delimiter=' ')
 
-        self.frame_level_df = pd.read_csv("/home/mayuna/scratch/videos/original_dataset_4.csv")
-        self.frame_level_df = self.frame_level_df[['File_name', 'vid_num', 'pt_num', 'num_malignancy', 'annotation',
-        'ambiguous', '#frames']]
-        
-        self.frame_level_df = self.frame_level_df.fillna(0)
-        self.frame_level_df['convolved_anno'] = self.frame_level_df.apply(lambda x : annotation_convolve(x['annotation'], 
-                                                                                                num_frames = x['#frames'],
-                                                                                                     stride= self.num_segment ,
-                                                                                                       seg_len= self.clip_len ), axis=1)
-        # print(self.frame_level_df)
         
         self.dataset_samples = list(
             cleaned[0].apply(lambda row: os.path.join(self.data_root, row)))
-        # print('cleaned 0, ', cleaned)
+        
         self.label_array = list(cleaned.values[:, 1])
-        cleaned_dict = {}
-
-        if not args.approach == "video_classification":
-            for x in list(cleaned.iloc[0:, 0].values):
-                
-                num = int(x.split('vid-num-')[1][0:3])
-                
-                length = len(self.frame_level_df[self.frame_level_df['vid_num']==num]['convolved_anno'].values[0])
-
-
-                if args.approach == "VAD":
-                    #if taking VAD, then provide segment labels in both validation adn testingv
-                    cleaned_dict[x]  = self.frame_level_df[self.frame_level_df['vid_num']==num]['convolved_anno'].values[0] 
-                    self.label_array = list(cleaned_dict.values())
-                elif args.approach == "video_classification":
-                    # if taking only video level labels, all segment labels are video labels too
-                    # cleaned_dict[x] = [1]*length if "malignant" in x else [0]*length
-                    self.label_array = list(cleaned.values[:, 1])
-
-                elif args.approach == "test_segment":
-                    #provide segment labels for just testing, and video level lavels for training and validation. 
-                    cleaned_dict[x]  = self.frame_level_df[self.frame_level_df['vid_num']==num]['convolved_anno'].values[0] 
-                    self.t_label_array = list(cleaned_dict.values())
-                    self.label_array = list(cleaned.values[:, 1])
-
     
         
         if args.masking:
@@ -484,12 +436,9 @@ class VideoClsDataset_v2(Dataset):
                     mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
             ])
 
-            if args.approach in ["VAD"] :
-                self.val_num_segment = self.test_num_segment
-                self.val_num_crop = self.test_num_crop
-            else:
-                self.val_num_segment  = args.num_sample
-                self.val_num_crop = 1
+
+            self.val_num_segment  = args.num_sample
+            self.val_num_crop = 1
         
             self.val_seg = []
             self.val_dataset = []
@@ -498,8 +447,6 @@ class VideoClsDataset_v2(Dataset):
                 for cp in range(self.val_num_crop):
                     for idx in range(len(self.label_array)):
                         sample_label = self.label_array[idx]
-                        # self.test_label_array.append(sample_label)
-                        # print("validation",'sample label',ck, cp, idx,sample_label)
                         if isinstance(sample_label,list):
                             val_seg_len = len(sample_label)//self.val_num_segment
                             if val_seg_len<1:
@@ -511,9 +458,6 @@ class VideoClsDataset_v2(Dataset):
                         self.val_dataset.append(self.dataset_samples[idx])
                         self.val_seg.append((ck, cp))
             
-            # if args.approach in ["video_classification", "test_segment"] :
-            #     self.val_label_array = self.label_array
-
 
 
         elif mode == 'test':
@@ -540,7 +484,6 @@ class VideoClsDataset_v2(Dataset):
                         for idx in range(len(self.label_array)):
                             sample_label = self.label_array[idx]
                             sample = self.dataset_samples[idx]
-                            # if sample not in self.test_indices.keys():
                             self.test_indices[sample] = []
 
                             if isinstance(sample_label, list):
@@ -562,7 +505,6 @@ class VideoClsDataset_v2(Dataset):
                         for idx in range(len(self.label_array)):
                             sample_label = self.label_array[idx]
                             sample = self.dataset_samples[idx]
-                            # if sample not in self.test_indices.keys():
                             self.test_indices[sample] = []
    
                             if isinstance(sample_label, list) and not args.approach=="video_classification":
@@ -611,14 +553,7 @@ class VideoClsDataset_v2(Dataset):
         
 
             ])
-            # input_file = "output_16frames.txt"
-            # inference_frames = pd.read_csv(input_file,header=None, delimiter=',')
-            # inference_frames[2] = inference_frames[0].apply(lambda x: x[0:-10])
-            # inference_frames = inference_frames.drop(columns=[0])
-            # inference_frames = inference_frames.drop_duplicates()
-
-            # self.inference_dataset = list(inference_frames[2])
-            # self.inference_label_array = list(inference_frames[1])
+            
             self.image_loader = get_image_loader()
 
          
@@ -654,7 +589,6 @@ class VideoClsDataset_v2(Dataset):
                 
                 for _ in range(args.num_sample):
                     new_frames = self._aug_frame(buffer, args)
-                    # train_seg_len = len(self.label_array[index])//args.num_sample
                     if args.approach=='VAD':
                         label = max(self.label_array[index])#_*train_seg_len:(_+1)*train_seg_len ]
                     else:
@@ -708,7 +642,6 @@ class VideoClsDataset_v2(Dataset):
                 chunk_nb, split_nb = self.val_seg[index]
                 buffer= self.load_video(sample)
 
-            # buffer = self.data_resize(buffer)
             if isinstance(buffer, list):
                 buffer = np.stack(buffer, 0)
 
@@ -761,35 +694,7 @@ class VideoClsDataset_v2(Dataset):
                 return buffer, self.val_label_array[index], sample.split(
                     "/")[-1].split(".")[0], {}
         
-            # sample = self.dataset_samples[index]
-            # buffer = self.load_video(sample)
-            # if len(buffer) > 0:
-            #     label = None
-            #     i = 0
-            #     while len(buffer) == 0:
-            #         warnings.warn(
-            #             "video {} not correctly loaded during validation".
-            #             format(sample))
-            #         index = np.random.randint(self.__len__())
-            #         sample = self.dataset_samples[index]
-
-            #         val_seg_len = len(self.label_array[index]-self.clip_len)//args.num_sample
-            #         length = len(self.label_array[index])
-            #         label = max(self.label_array[index][(i* val_seg_len)%length:((i+1)*val_seg_len)%length ])
-
-            #         buffer = self.load_video(sample)
-            #         i+=1
-            # buffer = self.data_transform(buffer)
-
-            # print("validation labels ", max(self.label_array[index]))
-        
-            # # labels = list(map(lambda x: max(x), self.label_array))
-            # if not label : 
-            #     label = max(self.label_array[index]) 
-            
-            # # print("validation lavels",sample, label)
-            # return buffer, label, sample.split(
-            #     "/")[-1].split(".")[0]
+           
 
         elif self.mode == 'test':
             
@@ -857,8 +762,7 @@ class VideoClsDataset_v2(Dataset):
                     temporal_start = chunk_nb
                     spatial_start = int(split_nb * spatial_step)
                     
-                    # self.test_indices[sample][-1] = self.test_indices[sample][-1][temporal_start::self.test_num_segment]
-
+                    
                     if buffer.shape[1] >= buffer.shape[2]:
                         buffer = buffer[temporal_start::self.test_num_segment,
                                         spatial_start:spatial_start +
@@ -878,8 +782,7 @@ class VideoClsDataset_v2(Dataset):
                     temporal_start = int(chunk_nb * temporal_step)
                     spatial_start = int(split_nb * spatial_step)
                     
-                    # self.test_indices[sample][-1] = self.test_indices[sample][-1][temporal_start:temporal_start + self.clip_len]
-
+                    
                     if buffer.shape[1] >= buffer.shape[2]:
                         buffer = buffer[temporal_start:temporal_start +
                                         self.clip_len,
@@ -899,10 +802,6 @@ class VideoClsDataset_v2(Dataset):
                     
                     temporal_start = chunk_nb
                     
-                    # if buffer.shape[1] >= buffer.shape[2]:
-                    #     buffer = buffer[temporal_start::self.test_num_segment,
-                    #                     :, :, :]
-                    # else:
                     buffer = buffer[temporal_start::self.test_num_segment, :,
                                     0:224, 0:224]
                     
@@ -912,14 +811,12 @@ class VideoClsDataset_v2(Dataset):
                 temporal_step = self.step_size
                 
                 temporal_start = int(chunk_nb * temporal_step)
-                # temporal_start = 0
                 
                 buffer = buffer[temporal_start:temporal_start +
                                 self.clip_len,
                                     :, 0:224, 0:224]
              
-                # print("post chunk sampling ",buffer.shape)
-            
+                
         
             buffer = self.data_transform(buffer)
             
