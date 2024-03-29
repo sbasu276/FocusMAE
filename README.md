@@ -18,6 +18,8 @@ Specify the path for folder containing the json files in the dataloader.
 
 We contribute additional videos to our Ultrasound video dataset (GBUSV). The complete dataset comprises of 59 videos with malignancy and 32 videos which are benign. The dataset donload instructions are available (here)[https://gbc-iitd.github.io/data/gbusv]
 
+The author for COVID-19 CT Dataset are cited (here)[https://pubmed.ncbi.nlm.nih.gov/33927208/]
+
 ## INSTALLATION 
 
 The required packages are in the file `requirements.txt`, and you can run the following command to install the environment
