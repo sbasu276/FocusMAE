@@ -68,5 +68,23 @@ bash pretrain.sh <path_to_kinrtic_400_pretrain_weights> <path_to_output_dir> <pa
 bash finetune.sh <path_to_checkpoint> <path_to_data_dir>
 ```
 
+#### MODEL_PATH : 
+- Specify the path of the pretrained model to finetune from 
+- You can download the pretrained models and arrange then in the folder structure shown above.
+
+Our pretrained models and checkpoints can be downloaded from this link : [CVPR Weigths](https://drive.google.com/drive/folders/16E1EDl323GFAbmQ02fqVQwVkkz-4GBZY?usp=sharing)
+
+| Model Name                       | Link                         |
+|----------------------------------|------------------------------|
+| Pre-trained model for GBC Dataset  | https://tinyurl.com/3s6567c3 | 
+| Finetuning ckpt - Fold_0 GBC dataset | https://tinyurl.com/4y2phujr |
+| Finetuning ckpt - Fold_1 GBC dataset | https://tinyurl.com/ajazhb79 |
+| Finetuning ckpt - Fold_2 GBC dataset | https://tinyurl.com/3jptv2dp |
+| Finetuning ckpt - Fold_3 GBC dataset | https://tinyurl.com/2r9ywuzj |
+| Finetuning ckpt - Fold_4 GBC dataset | https://tinyurl.com/25zuures |
+| Pretrained model for CT Dataset | [here](https://drive.google.com/file/d/1G2BzBzOARGyeam2B-zVuUN0KphhkMeAe/view?usp=sharing) |
+| Finetuning ckpt - CT Dataset | [here](https://drive.google.com/file/d/14eP3hx9M3E5HM0GZvp2QbUgu86DMPNU3/view?usp=sharing) |
+
+
 ## Acknowledgements
 - We thank VideoMAE, VideoMAEv2, and AdaMAE authors for publicly releasing their code. We have built our code-base on top of these fabulous repositories.
