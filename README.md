@@ -4,6 +4,7 @@ This is the official implementation for the CVPR 2024 paper [FocusMAE: Gallbladd
 
 **Note: Use the `FocusMAE_v1` directory for latest code.**
 
+<!--
 ## DATA PREPARATION
 
 Refer to the [instructions](https://github.com/OpenGVLab/VideoMAEv2/blob/master/docs/DATASET.md) in VideoMAE v2 Repository for this step.
@@ -72,6 +73,6 @@ Our pretrained models and checkpoints can be downloaded from this link : [CVPR W
 
 Additionally, we provide our training and testing scripts as examples which can be used as follows 
 ```bash scripts/finetune_train.sh``` 
-
+-->
 ## Acknowledgements
 We thank VideoMAE, VideoMAEv2, and AdaMAE authors for publicly releasing their code. We have built our code-base on top of these fabulous repositories.
