@@ -2,6 +2,7 @@
 
 This is the official implementation for the CVPR 2024 paper [FocusMAE: Gallbladder Cancer Detection from Ultrasound Videos with Focused Masked Autoencoders](https://arxiv.org/abs/2403.08848).
 
+**Note: Use the `FocusMAE_v1` directory for latest code.**
 
 ## DATA PREPARATION
 
